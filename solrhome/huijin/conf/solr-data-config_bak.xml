@@ -1,0 +1,38 @@
+<dataConfig>
+  <dataSource driver="com.mysql.jdbc.Driver" url="jdbc:mysql://202.120.40.140:3306/mec" user="mec_admin" password="passw0rd" />
+  <document>
+    <entity name="item" pk="ITEMCODE" query="select ITEMCODE,ITEMNAME,ITEMSHORTNAME,BRANDCODE,PRICE,MARKETPRICE,DESCRIPTION,createdAt from tbl_items where ISONLINE=1"
+                deltaImportQuery="select ITEMCODE,ITEMNAME,ITEMSHORTNAME,BRANDCODE,PRICE,MARKETPRICE,DESCRIPTION,createdAt from tbl_items where ISONLINE=1 and ITEMCODE='${dih.delta.id}'"
+                deltaQuery="select ITEMCODE from tbl_items where updatedAt >'${dih.last_index_time}'"
+				deletedPkQuery="select ITEMCODE from tbl_items where ISONLINE=0 ">
+			
+			<entity name="brand" pk="BRANDCODE"
+				query="select BRANDNAME from hct_brand where BRANDCODE='${item.BRANDCODE}'"
+				deltaQuery="select BRANDCODE from hct_brand where updatedAt > '${dih.last_index_time}'"
+				parentDeltaQuery="select ITEMCODE from tbl_items where BRANDCODE=${brand.BRANDCODE}">
+			</entity>
+				
+			<entity name="image" pk="ID"
+				query="select URL as picurl from tbl_pics where ITEMCODE='${item.ITEMCODE}' limit 1">
+			</entity>
+			
+			<entity name="category" pk="ITEMCODE"
+				query="select substring_index(CATEGORYNAMES,'-',1) as root_category,substring_index(CATEGORYNAMES,'-',-2) as category from vie_itemcategorynames where ITEMCODE='${item.ITEMCODE}'">
+			</entity>
+			
+			<entity name="region" pk="ITEMCODE"
+				query="select REGIONNAMES as region from vie_itemregionnames where ITEMCODE='${item.ITEMCODE}'">
+			</entity>
+			
+			<entity name="colorsize" pk="ITEMCODE"
+				query="select COLOR,SIZE from tbl_skcs where ITEMCODE='${item.ITEMCODE}'">
+			</entity>
+			
+			<entity name="features" pk="ITEMCODE"
+				query="select concat(online.KEY,'/',online.VALUE) as features from tbl_onlines as online where ITEMCODE='${item.ITEMCODE}'">
+			</entity>
+			
+
+    </entity>
+  </document>
+</dataConfig>

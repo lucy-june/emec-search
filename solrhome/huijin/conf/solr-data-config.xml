@@ -1,0 +1,20 @@
+<dataConfig>
+  <dataSource driver="com.mysql.jdbc.Driver" url="jdbc:mysql://202.120.40.140:3306/mec_qa" user="mec_admin" password="passw0rd" />
+  <document>
+    <entity name="item" pk="ITEMCODE" query="select ITEMCODE, ITEMNAME, ITEMSHORTNAME, BRANDNAME, ITEMTYPENAME, PRICE,TEMPPRICE as MARKETPRICE,TITLE, IMGURL as picurl, REGIONNAMES as region, substring_index(CATEGORYNAMES,'-',1) as root_category,substring_index(CATEGORYNAMES,'-',-2) as category, SCORE, SCOREPOPULARITY, PURCHASE, createdAt from mec_vi_online_selling_sku_forapp"
+                deltaImportQuery="select ITEMCODE, ITEMNAME, ITEMSHORTNAME, BRANDNAME, ITEMTYPENAME, PRICE,TEMPPRICE as MARKETPRICE,TITLE, IMGURL as picurl, REGIONNAMES as region, substring_index(CATEGORYNAMES,'-',1) as root_category,substring_index(CATEGORYNAMES,'-',-2) as category, SCORE, SCOREPOPULARITY, PURCHASE, createdAt from mec_vi_online_selling_sku_forapp where ITEMCODE='${dih.delta.ITEMCODE}'"
+                deltaQuery="select ITEMCODE from mec_vi_online_selling_sku_forapp where updatedAt + INTERVAL 8 HOUR >'${dih.last_index_time}'"
+				deletedPkQuery="select ITEMCODE from mec_itm_item where 3>SELLINGSTATE and updatedAt + INTERVAL 8 HOUR >'${dih.last_index_time}'">
+			
+			<entity name="colorsize" pk="ITEMCODE"
+				query="select COLOR,SIZE from mec_itm_skc where ITEMCODE='${item.ITEMCODE}'">
+			</entity>
+			
+			<entity name="features" pk="ITEMCODE"
+				query="select concat(online.ATTRIBUTE,'/',online.VALUE) as features from mec_itm_parameter as online where ITEMCODE='${item.ITEMCODE}'">
+			</entity>
+			
+
+    </entity>
+  </document>
+</dataConfig>
